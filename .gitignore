@@ -1,0 +1,39 @@
+# Byte-compiled / Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Test & tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Generated benchmark artifacts & evaluation runs
+artifacts/
+outputs/
+runs/
+data/generated/
+*.png
+*.jsonl
+
+# IDE / OS files
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini

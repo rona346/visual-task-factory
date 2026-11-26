@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "project_name": "visual-task-factory",
+  "version": "0.1.0",
+  "track": "Innodata AI Hackathon 2026 — Visual Task Factory",
+  "domain": "Procedural 2D Facility / Warehouse Spatial Layout & Safety Inspection",
+  "environment": {
+    "os": "Windows 11",
+    "python": "3.10.11",
+    "hardware": "CPU-only, 8 GB RAM",
+    "runtime_dependencies": ["pillow>=10.0,<13.0", "pydantic>=2.10,<3.0"],
+    "dev_dependencies": ["pytest>=8.0"]
+  },
+  "implemented_modules": [
+    "src/visual_task_factory/models/variation.py",
+    "src/visual_task_factory/models/scene.py",
+    "src/visual_task_factory/models/qa.py",
+    "src/visual_task_factory/scene_generator/generator.py",
+    "src/visual_task_factory/renderer.py",
+    "src/visual_task_factory/ground_truth_solver.py",
+    "src/visual_task_factory/question_generator.py",
+    "src/visual_task_factory/validator.py",
+    "src/visual_task_factory/variation_engine.py",
+    "src/visual_task_factory/dataset_pipeline.py",
+    "src/visual_task_factory/model_evaluator.py",
+    "src/visual_task_factory/metrics_analyzer.py",
+    "src/visual_task_factory/demo_service.py",
+    "src/visual_task_factory/demo_app.py"
+  ],
+  "verification": {
+    "pytest_command": ".\\.venv\\Scripts\\python.exe -m pytest",
+    "pytest_passed": 74,
+    "pytest_failed": 0,
+    "pytest_skipped": 0,
+    "pytest_warnings": 1,
+    "pytest_exit_code": 0,
+    "live_vlm_evaluation_completed": false,
+    "mock_evaluation_notice": "SYNTHETIC MOCK EVALUATION — NOT REAL MODEL CAPABILITY",
+    "browser_visual_testing_performed": false
+  },
+  "submission_files": [
+    "submission/SUBMISSION_OVERVIEW.md",
+    "submission/DEMO_WALKTHROUGH.md",
+    "submission/submission_manifest.json"
+  ]
+}
