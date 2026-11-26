@@ -8,12 +8,17 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from visual_task_factory.dataset_builder_3d import (
+    Dataset3DError,
+    load_and_validate_dataset_3d,
+)
 from visual_task_factory.dataset_pipeline import (
     DatasetManifest,
     DatasetPipelineConfig,
     DatasetRecord,
     build_dataset,
 )
+from visual_task_factory.demo_3d import _answers_match, _recompute_solver_answer
 from visual_task_factory.metrics_analyzer import (
     MOCK_EVALUATION_NOTICE,
     EvaluationNature,
@@ -30,8 +35,20 @@ from visual_task_factory.model_evaluator import (
     evaluate_dataset,
 )
 from visual_task_factory.models import DifficultyTier, VisualTheme
+from visual_task_factory.qa_3d import (
+    AnswerType3D,
+    BenchmarkItem3D,
+    QuestionFamily3D,
+    ReferenceAnswer3D,
+    VisualQuestion3D,
+)
 from visual_task_factory.scene_generator import SUPPORTED_TOPOLOGIES
+from visual_task_factory.solver_3d import GroundTruthSolver3D
 from visual_task_factory.variation_engine import VariationPlanConfig
+
+BENCHMARK_3D_NOTICE = (
+    "Offline 3D Benchmark Ground Truth & CPU Solver Verification — Not Live VLM Capability"
+)
 
 
 class DemoSampleRequest(BaseModel):
@@ -82,6 +99,43 @@ class DemoSampleResult(BaseModel):
 
     dataset: DemoDatasetView
     evaluation: DemoEvaluationView | None = None
+
+
+class Demo3DRecordView(BaseModel):
+    """Safe view-model pairing a 3D dataset record with recomputed CPU solver output."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    record_id: str
+    scene_id: str
+    question_id: str
+    family: QuestionFamily3D
+    expected_answer_type: AnswerType3D
+    image_rel_path: str
+    image_width_px: int
+    image_height_px: int
+    prompt_text: str
+    reference_answer: ReferenceAnswer3D
+    solver_prediction: ReferenceAnswer3D
+    solver_matches_ground_truth: bool
+    validation_is_valid: bool
+
+
+class Demo3DDatasetView(BaseModel):
+    """Safe view-model for a validated offline 3D benchmark dataset."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    dataset_dir: str
+    dataset_id: str | None = None
+    scene_count: int = 0
+    record_count: int = 0
+    matched_count: int = 0
+    valid_count: int = 0
+    family_counts: dict[str, int] = Field(default_factory=dict)
+    benchmark_notice: str = BENCHMARK_3D_NOTICE
+    records: list[Demo3DRecordView] = Field(default_factory=list)
+    error_message: str | None = None
 
 
 class DemoService:
@@ -353,3 +407,81 @@ class DemoService:
             eval_view = self.load_evaluation_view(eval_dir)
 
         return DemoSampleResult(dataset=dataset_view, evaluation=eval_view)
+
+    def load_dataset_3d_view(self, dataset_dir: Path | str = "data/3d") -> Demo3DDatasetView:
+        """Load the validated 3D dataset and recompute CPU solver answers offline."""
+        raw_dir = str(dataset_dir).strip()
+        if not raw_dir:
+            return Demo3DDatasetView(
+                dataset_dir="",
+                error_message="3D dataset directory path must not be empty.",
+            )
+
+        ds_path = Path(raw_dir)
+        if not ds_path.exists():
+            return Demo3DDatasetView(
+                dataset_dir=raw_dir,
+                error_message=f"3D dataset path does not exist: '{raw_dir}'.",
+            )
+
+        try:
+            bundle = load_and_validate_dataset_3d(
+                ds_path, verify_images=True, revalidate_qa=True
+            )
+            solver = GroundTruthSolver3D()
+            record_views: list[Demo3DRecordView] = []
+            matched_count = 0
+            valid_count = 0
+            for rec in bundle.records:
+                item = BenchmarkItem3D(
+                    scene=bundle.scenes[rec.scene_id],
+                    question=VisualQuestion3D(
+                        question_id=rec.question_id,
+                        scene_id=rec.scene_id,
+                        family=rec.family,
+                        template_id=rec.template_id,
+                        prompt_text=rec.prompt_text,
+                        expected_answer_type=rec.expected_answer_type,
+                        reference_answer=rec.reference_answer,
+                        solver_query=rec.solver_query,
+                    ),
+                )
+                solver_pred = _recompute_solver_answer(solver, item)
+                matched = _answers_match(solver_pred, rec.reference_answer)
+                if matched:
+                    matched_count += 1
+                if rec.validation.is_valid:
+                    valid_count += 1
+                record_views.append(
+                    Demo3DRecordView(
+                        record_id=rec.record_id,
+                        scene_id=rec.scene_id,
+                        question_id=rec.question_id,
+                        family=rec.family,
+                        expected_answer_type=rec.expected_answer_type,
+                        image_rel_path=rec.image_rel_path,
+                        image_width_px=rec.image_width_px,
+                        image_height_px=rec.image_height_px,
+                        prompt_text=rec.prompt_text,
+                        reference_answer=rec.reference_answer,
+                        solver_prediction=solver_pred,
+                        solver_matches_ground_truth=matched,
+                        validation_is_valid=rec.validation.is_valid,
+                    )
+                )
+        except (Dataset3DError, Exception) as exc:
+            return Demo3DDatasetView(
+                dataset_dir=raw_dir,
+                error_message=f"Failed to load 3D benchmark dataset: {exc}",
+            )
+
+        return Demo3DDatasetView(
+            dataset_dir=raw_dir,
+            dataset_id=bundle.dataset_id,
+            scene_count=bundle.scene_count,
+            record_count=bundle.record_count,
+            matched_count=matched_count,
+            valid_count=valid_count,
+            family_counts=bundle.family_counts,
+            records=record_views,
+        )

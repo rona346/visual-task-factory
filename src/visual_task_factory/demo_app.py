@@ -12,15 +12,24 @@ from urllib.parse import parse_qs, urlparse
 
 from pydantic import ValidationError
 
-from visual_task_factory.demo_service import DemoSampleRequest, DemoService
+from visual_task_factory.demo_service import (
+    BENCHMARK_3D_NOTICE,
+    DemoSampleRequest,
+    DemoService,
+)
 from visual_task_factory.scene_generator import SUPPORTED_TOPOLOGIES
 
 _DEFAULT_DATASET_DIR = "artifacts/smoke_phase8_dataset"
 _DEFAULT_EVAL_DIR = "artifacts/smoke_phase9_eval"
 _DEFAULT_DEMO_OUTPUT_DIR = "artifacts/demo_sample"
+_DEFAULT_DATASET_3D_DIR = "data/3d"
 
 
-def _build_html_page(default_dataset_dir: str, default_eval_dir: str) -> str:
+def _build_html_page(
+    default_dataset_dir: str,
+    default_eval_dir: str,
+    default_dataset_3d_dir: str = _DEFAULT_DATASET_3D_DIR,
+) -> str:
     topologies_options = "".join(
         f'<option value="{t}">{t}</option>' for t in SUPPORTED_TOPOLOGIES
     )
@@ -70,6 +79,9 @@ def _build_html_page(default_dataset_dir: str, default_eval_dir: str) -> str:
       display: grid;
       grid-template-columns: 360px 1fr;
       gap: 20px;
+    }}
+    main > section, .card, .stat, .img-wrap {{
+      min-width: 0;
     }}
     @media (max-width: 960px) {{
       main {{ grid-template-columns: 1fr; }}
@@ -132,8 +144,18 @@ def _build_html_page(default_dataset_dir: str, default_eval_dir: str) -> str:
       border-radius: 8px;
       padding: 10px;
     }}
+    .stat-wide {{ grid-column: span 2; }}
+    @media (max-width: 420px) {{
+      .stat-wide {{ grid-column: auto; }}
+    }}
     .stat .k {{ font-size: 0.78rem; color: var(--muted); }}
-    .stat .v {{ font-size: 1.15rem; font-weight: 700; margin-top: 2px; }}
+    .stat .v {{
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-top: 2px;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }}
     .banner-mock {{
       background: rgba(245, 158, 11, 0.16);
       border: 2px solid var(--warn);
@@ -160,7 +182,7 @@ def _build_html_page(default_dataset_dir: str, default_eval_dir: str) -> str:
       font-weight: 600;
       background: #0f172a;
       border: 1px solid var(--border);
-      margin-right: 6px;
+      margin: 0 6px 4px 0;
     }}
     .img-wrap {{
       background: #020617;
@@ -169,9 +191,13 @@ def _build_html_page(default_dataset_dir: str, default_eval_dir: str) -> str:
       padding: 8px;
       text-align: center;
       margin: 12px 0;
+      max-width: 100%;
     }}
     .img-wrap img {{
+      display: block;
+      margin: 0 auto;
       max-width: 100%;
+      width: auto;
       height: auto;
       border-radius: 4px;
     }}
@@ -196,6 +222,63 @@ def _build_html_page(default_dataset_dir: str, default_eval_dir: str) -> str:
     }}
     th {{ color: var(--muted); font-weight: 600; }}
     code {{ color: #7dd3fc; }}
+    .tabs {{
+      max-width: 1320px;
+      margin: 14px auto 0 auto;
+      padding: 0 20px;
+      display: flex;
+      gap: 10px;
+    }}
+    .tab-btn {{
+      width: auto;
+      margin: 0;
+      padding: 8px 16px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+    }}
+    .tab-btn.active {{
+      background: #0284c7;
+      border-color: #0369a1;
+      color: #ffffff;
+    }}
+    .nav-row {{
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+    }}
+    .nav-row button {{
+      width: auto;
+      min-width: 90px;
+      margin-top: 0;
+    }}
+    .controls-3d {{
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: end;
+      margin-bottom: 12px;
+    }}
+    @media (max-width: 720px) {{
+      .controls-3d {{ grid-template-columns: 1fr; }}
+    }}
+    #refAnswerBox, #ref3dAnswerBox {{
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }}
+    .banner-info {{
+      background: rgba(56, 189, 248, 0.14);
+      border: 1px solid var(--accent);
+      color: #bae6fd;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }}
   </style>
 </head>
 <body>
@@ -207,6 +290,12 @@ def _build_html_page(default_dataset_dir: str, default_eval_dir: str) -> str:
     <div class="sub">Offline CPU Pipeline • Reference Answers Isolated From Model Prompts</div>
   </header>
 
+  <nav class="tabs" aria-label="Benchmark Mode">
+    <button id="tabBtn2d" class="tab-btn active" type="button" onclick="switchTab('2d')">2D Demo</button>
+    <button id="tabBtn3d" class="tab-btn" type="button" onclick="switchTab('3d')">3D Benchmark</button>
+  </nav>
+
+  <div id="tab2d">
   <main>
     <section>
       <div class="card">
@@ -280,9 +369,70 @@ def _build_html_page(default_dataset_dir: str, default_eval_dir: str) -> str:
       </div>
     </section>
   </main>
+  </div>
+
+  <div id="tab3d" style="display:none;">
+    <main>
+      <section>
+        <div class="card">
+          <h2>1. Load 3D Benchmark Dataset</h2>
+          <label for="dataset3dDir">3D Dataset Directory</label>
+          <input id="dataset3dDir" type="text" value="{default_dataset_3d_dir}" />
+          <button id="btnLoad3d" type="button" onclick="loadDataset3d()">Load 3D Benchmark</button>
+          <div class="sub" style="margin-top:8px;">
+            Offline dataset inspection with recomputed CPU solver verification (no live VLM API calls).
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="card">
+          <h2>3D Benchmark Overview</h2>
+          <div id="banner3dNotice" class="banner-info">{BENCHMARK_3D_NOTICE}</div>
+          <div id="dataset3dError"></div>
+          <div id="dataset3dStats" class="metrics-grid"></div>
+        </div>
+
+        <div class="card">
+          <h2>3D Visual Task &amp; Solver Explorer</h2>
+          <div class="controls-3d">
+            <div>
+              <label for="record3dSelect" style="margin-top:0;">Select 3D Question Record</label>
+              <select id="record3dSelect" onchange="renderSelected3dRecord()"></select>
+            </div>
+            <div>
+              <div class="nav-row" style="margin-top:0;">
+                <button id="btnPrev3d" class="secondary" type="button" onclick="step3dRecord(-1)">Previous</button>
+                <button id="btnNext3d" class="secondary" type="button" onclick="step3dRecord(1)">Next</button>
+              </div>
+              <div id="counter3d" class="sub" style="margin-top:6px;text-align:right;">Record 0 / 0</div>
+            </div>
+          </div>
+          <div id="question3dCard"></div>
+          <div class="img-wrap" id="image3dBox">Load 3D benchmark dataset to view isometric scene PNG.</div>
+          <details id="ref3dDetails" open>
+            <summary>Ground Truth &amp; Offline CPU Solver Verification</summary>
+            <div id="ref3dAnswerBox" style="margin-top:8px;"></div>
+          </details>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <script>
     let currentDataset = null;
+    let currentDataset3d = null;
+
+    function switchTab(mode) {{
+      const is3d = mode === "3d";
+      document.getElementById("tab2d").style.display = is3d ? "none" : "block";
+      document.getElementById("tab3d").style.display = is3d ? "block" : "none";
+      document.getElementById("tabBtn2d").classList.toggle("active", !is3d);
+      document.getElementById("tabBtn3d").classList.toggle("active", is3d);
+      if (is3d && !currentDataset3d) {{
+        loadDataset3d();
+      }}
+    }}
 
     function esc(str) {{
       return String(str ?? "")
@@ -483,9 +633,122 @@ def _build_html_page(default_dataset_dir: str, default_eval_dir: str) -> str:
       tablesBox.innerHTML = html;
     }}
 
+    async function loadDataset3d(dirOverride) {{
+      const btn = document.getElementById("btnLoad3d");
+      const errBox = document.getElementById("dataset3dError");
+      const dir = dirOverride ?? document.getElementById("dataset3dDir").value;
+      btn.disabled = true;
+      try {{
+        const res = await fetch("/api/dataset_3d?dir=" + encodeURIComponent(dir));
+        if (!res.ok) {{
+          throw new Error("HTTP " + res.status + " " + res.statusText);
+        }}
+        const data = await res.json();
+        renderDataset3d(data);
+      }} catch (err) {{
+        errBox.innerHTML = `<div class="banner-err">Failed to load 3D dataset: ${{esc(err && err.message ? err.message : err)}}</div>`;
+      }} finally {{
+        btn.disabled = false;
+      }}
+    }}
+
+    function renderDataset3d(ds3d) {{
+      currentDataset3d = ds3d;
+      const noticeBox = document.getElementById("banner3dNotice");
+      const errBox = document.getElementById("dataset3dError");
+      const statsBox = document.getElementById("dataset3dStats");
+      noticeBox.textContent = ds3d.benchmark_notice || "{BENCHMARK_3D_NOTICE}";
+
+      if (ds3d.error_message) {{
+        errBox.innerHTML = `<div class="banner-err">${{esc(ds3d.error_message)}}</div>`;
+      }} else {{
+        errBox.innerHTML = "";
+      }}
+
+      statsBox.innerHTML = `
+        <div class="stat stat-wide"><div class="k">Dataset ID</div><div class="v" style="font-size:0.95rem">${{esc(ds3d.dataset_id || "-")}}</div></div>
+        <div class="stat"><div class="k">Scenes</div><div class="v">${{ds3d.scene_count}}</div></div>
+        <div class="stat"><div class="k">Total 3D Records</div><div class="v">${{ds3d.record_count}}</div></div>
+        <div class="stat"><div class="k">Solver Matched</div><div class="v" style="color:var(--ok)">${{ds3d.matched_count}} / ${{ds3d.record_count}}</div></div>
+        <div class="stat"><div class="k">QA Validated</div><div class="v">${{ds3d.valid_count}} / ${{ds3d.record_count}}</div></div>
+      `;
+
+      const sel = document.getElementById("record3dSelect");
+      sel.innerHTML = (ds3d.records || []).map((r, i) =>
+        `<option value="${{i}}" title="${{esc(r.record_id)}}">${{i + 1}}. ${{esc(r.question_id)}} (${{esc(r.family)}})</option>`
+      ).join("");
+      renderSelected3dRecord();
+    }}
+
+    function step3dRecord(delta) {{
+      if (!currentDataset3d || !currentDataset3d.records || !currentDataset3d.records.length) {{
+        return;
+      }}
+      const sel = document.getElementById("record3dSelect");
+      const total = currentDataset3d.records.length;
+      const nextIdx = (Number(sel.value || 0) + delta + total) % total;
+      sel.value = String(nextIdx);
+      renderSelected3dRecord();
+    }}
+
+    function renderSelected3dRecord() {{
+      const sel = document.getElementById("record3dSelect");
+      const idx = Number(sel.value || 0);
+      const qCard = document.getElementById("question3dCard");
+      const imgBox = document.getElementById("image3dBox");
+      const refBox = document.getElementById("ref3dAnswerBox");
+      const counter = document.getElementById("counter3d");
+
+      const recs = (currentDataset3d && currentDataset3d.records) || [];
+      if (!recs.length) {{
+        counter.textContent = "Record 0 / 0";
+        qCard.innerHTML = "<div class='sub'>No 3D benchmark records loaded.</div>";
+        imgBox.textContent = "No 3D scene image available.";
+        refBox.textContent = "";
+        return;
+      }}
+
+      const safeIdx = Math.max(0, Math.min(idx, recs.length - 1));
+      const rec = recs[safeIdx];
+      sel.title = rec.record_id;
+      counter.textContent = `Record ${{safeIdx + 1}} / ${{recs.length}}`;
+
+      qCard.innerHTML = `
+        <div>
+          <span class="pill">Scene: ${{esc(rec.scene_id)}}</span>
+          <span class="pill">Family: ${{esc(rec.family)}}</span>
+          <span class="pill">Answer Type: ${{esc(rec.expected_answer_type)}}</span>
+          <span class="pill">Resolution: ${{rec.image_width_px}}x${{rec.image_height_px}}</span>
+        </div>
+        <p style="font-size:1.02rem;margin:10px 0 4px 0;"><strong>Question:</strong> ${{esc(rec.prompt_text)}}</p>
+      `;
+
+      const imgUrl = `/api/image?dataset_dir=${{encodeURIComponent(currentDataset3d.dataset_dir)}}&image_rel_path=${{encodeURIComponent(rec.image_rel_path)}}`;
+      imgBox.innerHTML = `<img src="${{imgUrl}}" alt="3D warehouse scene ${{esc(rec.scene_id)}}" />`;
+
+      const gt = rec.reference_answer;
+      const gtUnit = gt.unit ? ` ${{esc(gt.unit)}}` : "";
+      const gtTol = gt.numeric_tolerance !== null && gt.numeric_tolerance !== undefined
+        ? ` (±${{gt.numeric_tolerance}} m)` : "";
+
+      const sp = rec.solver_prediction;
+      const spUnit = sp.unit ? ` ${{esc(sp.unit)}}` : "";
+      const matchBadge = rec.solver_matches_ground_truth
+        ? `<span style="color:var(--ok);font-weight:700;">MATCH</span>`
+        : `<span style="color:var(--err);font-weight:700;">MISMATCH</span>`;
+
+      refBox.innerHTML = `
+        <div><strong>Ground-Truth Answer:</strong> <code>${{esc(gt.value)}}${{gtUnit}}</code>${{gtTol}}</div>
+        <div style="margin-top:4px;"><strong>Recomputed CPU Solver Answer:</strong> <code>${{esc(sp.value)}}${{spUnit}}</code> • ${{matchBadge}}</div>
+        <div class="sub" style="margin-top:6px;">Solver: <code>${{esc(sp.solver_name || gt.solver_name)}}</code> | QA Validated: ${{rec.validation_is_valid}}</div>
+        <div class="sub" style="margin-top:6px;"><strong>Reasoning Trace:</strong> ${{esc((sp.reasoning_trace && sp.reasoning_trace.length ? sp.reasoning_trace : gt.reasoning_trace || []).join(" → "))}}</div>
+      `;
+    }}
+
     window.addEventListener("DOMContentLoaded", () => {{
       loadDataset();
       loadEvaluation();
+      loadDataset3d();
     }});
   </script>
 </body>
@@ -498,6 +761,7 @@ def create_demo_handler(
     default_dataset_dir: str = _DEFAULT_DATASET_DIR,
     default_eval_dir: str = _DEFAULT_EVAL_DIR,
     demo_output_dir: Path | str = _DEFAULT_DEMO_OUTPUT_DIR,
+    default_dataset_3d_dir: str = _DEFAULT_DATASET_3D_DIR,
 ) -> type[BaseHTTPRequestHandler]:
     """Create a configured HTTP request handler bound to DemoService."""
     svc = service or DemoService()
@@ -521,7 +785,9 @@ def create_demo_handler(
 
             if parsed.path == "/":
                 html_bytes = _build_html_page(
-                    default_dataset_dir, default_eval_dir
+                    default_dataset_dir,
+                    default_eval_dir,
+                    default_dataset_3d_dir,
                 ).encode("utf-8")
                 self.send_response(HTTPStatus.OK)
                 self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -534,6 +800,12 @@ def create_demo_handler(
                 ds_dir = qs.get("dir", [default_dataset_dir])[0]
                 view = svc.load_dataset_view(ds_dir)
                 self._send_json(HTTPStatus.OK, view.model_dump(mode="json"))
+                return
+
+            if parsed.path == "/api/dataset_3d":
+                ds3d_dir = qs.get("dir", [default_dataset_3d_dir])[0]
+                view3d = svc.load_dataset_3d_view(ds3d_dir)
+                self._send_json(HTTPStatus.OK, view3d.model_dump(mode="json"))
                 return
 
             if parsed.path == "/api/evaluation":
@@ -601,6 +873,7 @@ def create_demo_server(
     default_dataset_dir: str = _DEFAULT_DATASET_DIR,
     default_eval_dir: str = _DEFAULT_EVAL_DIR,
     demo_output_dir: Path | str = _DEFAULT_DEMO_OUTPUT_DIR,
+    default_dataset_3d_dir: str = _DEFAULT_DATASET_3D_DIR,
 ) -> ThreadingHTTPServer:
     """Instantiate a ThreadingHTTPServer serving the Visual Task Factory demo UI."""
     handler = create_demo_handler(
@@ -608,6 +881,7 @@ def create_demo_server(
         default_dataset_dir=default_dataset_dir,
         default_eval_dir=default_eval_dir,
         demo_output_dir=demo_output_dir,
+        default_dataset_3d_dir=default_dataset_3d_dir,
     )
     return ThreadingHTTPServer((host, port), handler)
 
@@ -621,6 +895,7 @@ def main() -> None:
     parser.add_argument("--dataset-dir", default=_DEFAULT_DATASET_DIR)
     parser.add_argument("--eval-dir", default=_DEFAULT_EVAL_DIR)
     parser.add_argument("--demo-output-dir", default=_DEFAULT_DEMO_OUTPUT_DIR)
+    parser.add_argument("--dataset-3d-dir", default=_DEFAULT_DATASET_3D_DIR)
     args = parser.parse_args()
 
     server = create_demo_server(
@@ -629,6 +904,7 @@ def main() -> None:
         default_dataset_dir=args.dataset_dir,
         default_eval_dir=args.eval_dir,
         demo_output_dir=args.demo_output_dir,
+        default_dataset_3d_dir=args.dataset_3d_dir,
     )
     print(f"Visual Task Factory Demo UI running at http://{args.host}:{args.port}/")
     try:

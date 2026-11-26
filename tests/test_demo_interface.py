@@ -13,7 +13,11 @@ import pytest
 from pydantic import ValidationError
 
 from visual_task_factory.demo_app import create_demo_server
-from visual_task_factory.demo_service import DemoSampleRequest, DemoService
+from visual_task_factory.demo_service import (
+    BENCHMARK_3D_NOTICE,
+    DemoSampleRequest,
+    DemoService,
+)
 from visual_task_factory.metrics_analyzer import MOCK_EVALUATION_NOTICE
 
 
@@ -141,6 +145,71 @@ def test_demo_http_endpoints_end_to_end(tmp_path: Path) -> None:
         with pytest.raises(urllib.error.HTTPError) as exc_info:
             urllib.request.urlopen(f"{base}/api/image?{bad_q}")
         assert exc_info.value.code == 403
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_demo_service_loads_existing_3d_benchmark_and_missing_gracefully(
+    tmp_path: Path,
+) -> None:
+    svc = DemoService()
+
+    missing = svc.load_dataset_3d_view(tmp_path / "missing_3d")
+    assert missing.error_message is not None
+    assert missing.record_count == 0
+    assert missing.benchmark_notice == BENCHMARK_3D_NOTICE
+
+    view = svc.load_dataset_3d_view("data/3d")
+    assert view.error_message is None
+    assert view.dataset_id == "warehouse_spatial_3d_v1"
+    assert view.scene_count == 2
+    assert view.record_count == 16
+    assert view.matched_count == 16
+    assert view.valid_count == 16
+    assert len(view.records) == 16
+    assert view.benchmark_notice == BENCHMARK_3D_NOTICE
+    for rec in view.records:
+        assert rec.solver_matches_ground_truth is True
+        assert rec.validation_is_valid is True
+        assert rec.reference_answer.reasoning_trace or rec.solver_prediction.reasoning_trace
+
+
+def test_demo_http_3d_benchmark_endpoint_and_images() -> None:
+    server = create_demo_server(host="127.0.0.1", port=0, default_dataset_3d_dir="data/3d")
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+
+    try:
+        base = f"http://127.0.0.1:{port}"
+
+        with urllib.request.urlopen(f"{base}/") as resp:
+            assert resp.status == 200
+            html = resp.read().decode("utf-8")
+            assert "2D Demo" in html
+            assert "3D Benchmark" in html
+            assert BENCHMARK_3D_NOTICE in html
+
+        with urllib.request.urlopen(f"{base}/api/dataset_3d") as resp:
+            assert resp.status == 200
+            payload = json.loads(resp.read().decode("utf-8"))
+        assert payload["error_message"] is None
+        assert payload["scene_count"] == 2
+        assert payload["record_count"] == 16
+        assert len(payload["records"]) == 16
+
+        seen_paths = {rec["image_rel_path"] for rec in payload["records"]}
+        assert seen_paths == {
+            "images/wh3d_stacked_01.png",
+            "images/scene_two_zone_corridor_0202.png",
+        }
+        for rel_path in sorted(seen_paths):
+            q = urllib.parse.urlencode({"dataset_dir": "data/3d", "image_rel_path": rel_path})
+            with urllib.request.urlopen(f"{base}/api/image?{q}") as img_resp:
+                assert img_resp.status == 200
+                assert img_resp.headers["Content-Type"] == "image/png"
+                assert img_resp.read().startswith(b"\x89PNG")
     finally:
         server.shutdown()
         server.server_close()
