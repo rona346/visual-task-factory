@@ -1,0 +1,47 @@
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Virtual environments & VCS metadata
+.venv/
+venv/
+ENV/
+.git/
+.gitignore
+
+# Python & tooling caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# Local generated artifacts & evaluation outputs
+artifacts/
+outputs/
+runs/
+data/generated/
+*.jsonl
+
+# Excluded diagnostic report folders
+reports/3d_evaluation/
+reports/gemini_vclr_smoke/
+reports/gemini_vclr_smoke_38/
+reports/groq_pilot5/
+reports/groq_retry_vrel1/
+reports/groq_smoke1/
+reports/groq_smoke2/
+reports/openrouter_auto_smoke/
+reports/openrouter_final_smoke/
+reports/openrouter_fixed_smoke/
+reports/openrouter_gemma_smoke/
+reports/openrouter_pilot5/
+reports/openrouter_smoke/
