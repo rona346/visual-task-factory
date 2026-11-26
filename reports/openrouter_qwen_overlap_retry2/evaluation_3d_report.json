@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "warehouse_spatial_3d_v1",
+  "model_name": "qwen/qwen3.8-27b",
+  "provider_name": "openrouter",
+  "is_live_evaluation": true,
+  "evaluated_at_utc": "2026-11-26T15:32:02.487974+00:00",
+  "sample_count": 2,
+  "completed_requests": 2,
+  "correct_count": 2,
+  "incorrect_count": 0,
+  "parse_error_count": 0,
+  "failed_request_count": 0,
+  "missing_image_count": 0,
+  "overall_accuracy": 1.0,
+  "parsed_accuracy": 1.0,
+  "by_family": {
+    "object_overlap_3d": {
+      "family": "object_overlap_3d",
+      "total": 2,
+      "correct": 2,
+      "incorrect": 0,
+      "parse_error": 0,
+      "failed_request": 0,
+      "missing_image": 0,
+      "accuracy": 1.0
+    }
+  },
+  "predictions": [
+    {
+      "record_id": "warehouse_spatial_3d_v1__wh3d_stacked_01__ov3d__01",
+      "scene_id": "wh3d_stacked_01",
+      "question_id": "wh3d_stacked_01__ov3d__01",
+      "family": "object_overlap_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/wh3d_stacked_01.png",
+      "prompt_text": "Do Base Crate and Top Crate touch or overlap in 3D space?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "true",
+      "normalized_prediction": true,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": true,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_box_overlap",
+        "reasoning_trace": [
+          "3D relation(crate_base, crate_top) = boundary_touching",
+          "mode=any_contact_or_overlap -> True"
+        ]
+      },
+      "latency_ms": 2421.68,
+      "error_message": null
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__wh3d_stacked_01__ov3d__02",
+      "scene_id": "wh3d_stacked_01",
+      "question_id": "wh3d_stacked_01__ov3d__02",
+      "family": "object_overlap_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/wh3d_stacked_01.png",
+      "prompt_text": "Do Forklift 1 and Front Rack touch or overlap in 3D space?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "false",
+      "normalized_prediction": false,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": false,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_box_overlap",
+        "reasoning_trace": [
+          "3D relation(forklift_1, rack_occluder) = disjoint",
+          "mode=any_contact_or_overlap -> False"
+        ]
+      },
+      "latency_ms": 2628.23,
+      "error_message": null
+    }
+  ]
+}

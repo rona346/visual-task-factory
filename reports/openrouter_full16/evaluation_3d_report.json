@@ -1,0 +1,473 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "warehouse_spatial_3d_v1",
+  "model_name": "openrouter/free",
+  "provider_name": "openai_compatible",
+  "is_live_evaluation": true,
+  "evaluated_at_utc": "2026-11-26T13:29:45.194710+00:00",
+  "sample_count": 16,
+  "completed_requests": 16,
+  "correct_count": 11,
+  "incorrect_count": 0,
+  "parse_error_count": 5,
+  "failed_request_count": 0,
+  "missing_image_count": 0,
+  "overall_accuracy": 0.6875,
+  "parsed_accuracy": 1.0,
+  "by_family": {
+    "camera_visibility_3d": {
+      "family": "camera_visibility_3d",
+      "total": 4,
+      "correct": 4,
+      "incorrect": 0,
+      "parse_error": 0,
+      "failed_request": 0,
+      "missing_image": 0,
+      "accuracy": 1.0
+    },
+    "object_overlap_3d": {
+      "family": "object_overlap_3d",
+      "total": 4,
+      "correct": 3,
+      "incorrect": 0,
+      "parse_error": 1,
+      "failed_request": 0,
+      "missing_image": 0,
+      "accuracy": 0.75
+    },
+    "vertical_clearance_3d": {
+      "family": "vertical_clearance_3d",
+      "total": 4,
+      "correct": 1,
+      "incorrect": 0,
+      "parse_error": 3,
+      "failed_request": 0,
+      "missing_image": 0,
+      "accuracy": 0.25
+    },
+    "vertical_relation_3d": {
+      "family": "vertical_relation_3d",
+      "total": 4,
+      "correct": 3,
+      "incorrect": 0,
+      "parse_error": 1,
+      "failed_request": 0,
+      "missing_image": 0,
+      "accuracy": 0.75
+    }
+  },
+  "predictions": [
+    {
+      "record_id": "warehouse_spatial_3d_v1__wh3d_stacked_01__ov3d__01",
+      "scene_id": "wh3d_stacked_01",
+      "question_id": "wh3d_stacked_01__ov3d__01",
+      "family": "object_overlap_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/wh3d_stacked_01.png",
+      "prompt_text": "Do Base Crate and Top Crate touch or overlap in 3D space?",
+      "status": "parse_error",
+      "is_correct": false,
+      "raw_prediction": "",
+      "normalized_prediction": null,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": true,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_box_overlap",
+        "reasoning_trace": [
+          "3D relation(crate_base, crate_top) = boundary_touching",
+          "mode=any_contact_or_overlap -> True"
+        ]
+      },
+      "latency_ms": 9992.47,
+      "error_message": "Empty model output."
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__wh3d_stacked_01__ov3d__02",
+      "scene_id": "wh3d_stacked_01",
+      "question_id": "wh3d_stacked_01__ov3d__02",
+      "family": "object_overlap_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/wh3d_stacked_01.png",
+      "prompt_text": "Do Forklift 1 and Front Rack touch or overlap in 3D space?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "false",
+      "normalized_prediction": false,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": false,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_box_overlap",
+        "reasoning_trace": [
+          "3D relation(forklift_1, rack_occluder) = disjoint",
+          "mode=any_contact_or_overlap -> False"
+        ]
+      },
+      "latency_ms": 1431.37,
+      "error_message": null
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__wh3d_stacked_01__vrel3d__01",
+      "scene_id": "wh3d_stacked_01",
+      "question_id": "wh3d_stacked_01__vrel3d__01",
+      "family": "vertical_relation_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/wh3d_stacked_01.png",
+      "prompt_text": "In 3D space, is Base Crate positioned entirely below Top Crate?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "true",
+      "normalized_prediction": true,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": true,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_vertical_relation",
+        "reasoning_trace": [
+          "Vertical relation(crate_base, crate_top) = flush_below",
+          "predicate=below -> True"
+        ]
+      },
+      "latency_ms": 3566.01,
+      "error_message": null
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__wh3d_stacked_01__vrel3d__02",
+      "scene_id": "wh3d_stacked_01",
+      "question_id": "wh3d_stacked_01__vrel3d__02",
+      "family": "vertical_relation_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/wh3d_stacked_01.png",
+      "prompt_text": "In 3D space, is Top Crate positioned entirely above Front Rack?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "false",
+      "normalized_prediction": false,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": false,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_vertical_relation",
+        "reasoning_trace": [
+          "Vertical relation(crate_top, rack_occluder) = overlapping_height",
+          "predicate=above -> False"
+        ]
+      },
+      "latency_ms": 4572.95,
+      "error_message": null
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__wh3d_stacked_01__vclr3d__01",
+      "scene_id": "wh3d_stacked_01",
+      "question_id": "wh3d_stacked_01__vclr3d__01",
+      "family": "vertical_clearance_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/wh3d_stacked_01.png",
+      "prompt_text": "Is there at least 0.5 m of vertical clearance between Base Crate and Top Crate?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "false",
+      "normalized_prediction": false,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": false,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_vertical_clearance",
+        "reasoning_trace": [
+          "clearance=0.000000 m vs threshold=0.500000 m -> False"
+        ]
+      },
+      "latency_ms": 7370.05,
+      "error_message": null
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__wh3d_stacked_01__vclr3d__02",
+      "scene_id": "wh3d_stacked_01",
+      "question_id": "wh3d_stacked_01__vclr3d__02",
+      "family": "vertical_clearance_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/wh3d_stacked_01.png",
+      "prompt_text": "Is there at least 2.5 m of vertical clearance between the top of Forklift 1 and the ceiling?",
+      "status": "parse_error",
+      "is_correct": false,
+      "raw_prediction": "",
+      "normalized_prediction": null,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": true,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_vertical_clearance",
+        "reasoning_trace": [
+          "clearance=2.800000 m vs threshold=2.500000 m -> True"
+        ]
+      },
+      "latency_ms": 16306.52,
+      "error_message": "Empty model output."
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__wh3d_stacked_01__vis3d__01",
+      "scene_id": "wh3d_stacked_01",
+      "question_id": "wh3d_stacked_01__vis3d__01",
+      "family": "camera_visibility_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/wh3d_stacked_01.png",
+      "prompt_text": "Is Hidden Crate visibly present and unobstructed from the camera viewpoint?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "false",
+      "normalized_prediction": false,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": false,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_camera_visibility",
+        "reasoning_trace": [
+          "visibility(crate_hidden) = fully_occluded, blockers=['rack_occluder']",
+          "require_clear=True -> False"
+        ]
+      },
+      "latency_ms": 7273.01,
+      "error_message": null
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__wh3d_stacked_01__vis3d__02",
+      "scene_id": "wh3d_stacked_01",
+      "question_id": "wh3d_stacked_01__vis3d__02",
+      "family": "camera_visibility_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/wh3d_stacked_01.png",
+      "prompt_text": "Is Forklift 1 visibly present and unobstructed from the camera viewpoint?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "true",
+      "normalized_prediction": true,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": true,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_camera_visibility",
+        "reasoning_trace": [
+          "visibility(forklift_1) = clear, blockers=[]",
+          "require_clear=True -> True"
+        ]
+      },
+      "latency_ms": 6163.34,
+      "error_message": null
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__scene_two_zone_corridor_0202__ov3d__01",
+      "scene_id": "scene_two_zone_corridor_0202",
+      "question_id": "scene_two_zone_corridor_0202__ov3d__01",
+      "family": "object_overlap_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/scene_two_zone_corridor_0202.png",
+      "prompt_text": "Do Crate 4 and Conveyor 6 touch or overlap in 3D space?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "false",
+      "normalized_prediction": false,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": false,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_box_overlap",
+        "reasoning_trace": [
+          "3D relation(ENT_4, ENT_6) = disjoint",
+          "mode=any_contact_or_overlap -> False"
+        ]
+      },
+      "latency_ms": 7209.04,
+      "error_message": null
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__scene_two_zone_corridor_0202__ov3d__02",
+      "scene_id": "scene_two_zone_corridor_0202",
+      "question_id": "scene_two_zone_corridor_0202__ov3d__02",
+      "family": "object_overlap_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/scene_two_zone_corridor_0202.png",
+      "prompt_text": "Are Rack 2 and Rack 5 completely separated (disjoint) in 3D space?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "true",
+      "normalized_prediction": true,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": true,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_box_overlap",
+        "reasoning_trace": [
+          "3D relation(ENT_2, ENT_5) = disjoint",
+          "mode=disjoint -> True"
+        ]
+      },
+      "latency_ms": 9249.41,
+      "error_message": null
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__scene_two_zone_corridor_0202__vrel3d__01",
+      "scene_id": "scene_two_zone_corridor_0202",
+      "question_id": "scene_two_zone_corridor_0202__vrel3d__01",
+      "family": "vertical_relation_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/scene_two_zone_corridor_0202.png",
+      "prompt_text": "Do Rack 1 and Rack 5 share the exact same vertical height range?",
+      "status": "parse_error",
+      "is_correct": false,
+      "raw_prediction": "",
+      "normalized_prediction": null,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": true,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_vertical_relation",
+        "reasoning_trace": [
+          "Vertical relation(ENT_1, ENT_5) = equal_height",
+          "predicate=equal_height -> True"
+        ]
+      },
+      "latency_ms": 10949.69,
+      "error_message": "Empty model output."
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__scene_two_zone_corridor_0202__vrel3d__02",
+      "scene_id": "scene_two_zone_corridor_0202",
+      "question_id": "scene_two_zone_corridor_0202__vrel3d__02",
+      "family": "vertical_relation_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/scene_two_zone_corridor_0202.png",
+      "prompt_text": "In 3D space, is Crate 4 positioned entirely above Rack 5?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "false",
+      "normalized_prediction": false,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": false,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_vertical_relation",
+        "reasoning_trace": [
+          "Vertical relation(ENT_4, ENT_5) = overlapping_height",
+          "predicate=above -> False"
+        ]
+      },
+      "latency_ms": 10021.93,
+      "error_message": null
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__scene_two_zone_corridor_0202__vclr3d__01",
+      "scene_id": "scene_two_zone_corridor_0202",
+      "question_id": "scene_two_zone_corridor_0202__vclr3d__01",
+      "family": "vertical_clearance_3d",
+      "expected_answer_type": "numeric",
+      "image_rel_path": "images/scene_two_zone_corridor_0202.png",
+      "prompt_text": "Using the 4 m scale reference, what is the vertical clearance in meters between the top of Conveyor 6 and the ceiling?",
+      "status": "parse_error",
+      "is_correct": false,
+      "raw_prediction": "",
+      "normalized_prediction": null,
+      "reference_answer": {
+        "answer_type": "numeric",
+        "value": 3.4,
+        "unit": "m",
+        "numeric_tolerance": 0.05,
+        "solver_name": "ground_truth_solver_3d.solve_vertical_clearance",
+        "reasoning_trace": [
+          "status=defined, clearance=3.400000 m"
+        ]
+      },
+      "latency_ms": 12601.33,
+      "error_message": "Empty model output."
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__scene_two_zone_corridor_0202__vclr3d__02",
+      "scene_id": "scene_two_zone_corridor_0202",
+      "question_id": "scene_two_zone_corridor_0202__vclr3d__02",
+      "family": "vertical_clearance_3d",
+      "expected_answer_type": "numeric",
+      "image_rel_path": "images/scene_two_zone_corridor_0202.png",
+      "prompt_text": "Using the 4 m scale reference, what is the vertical clearance in meters between the top of Rack 5 and the ceiling?",
+      "status": "parse_error",
+      "is_correct": false,
+      "raw_prediction": "",
+      "normalized_prediction": null,
+      "reference_answer": {
+        "answer_type": "numeric",
+        "value": 1.5,
+        "unit": "m",
+        "numeric_tolerance": 0.05,
+        "solver_name": "ground_truth_solver_3d.solve_vertical_clearance",
+        "reasoning_trace": [
+          "status=defined, clearance=1.500000 m"
+        ]
+      },
+      "latency_ms": 8017.79,
+      "error_message": "Empty model output."
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__scene_two_zone_corridor_0202__vis3d__01",
+      "scene_id": "scene_two_zone_corridor_0202",
+      "question_id": "scene_two_zone_corridor_0202__vis3d__01",
+      "family": "camera_visibility_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/scene_two_zone_corridor_0202.png",
+      "prompt_text": "Is Conveyor 6 visibly present and unobstructed from the camera viewpoint?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "true",
+      "normalized_prediction": true,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": true,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_camera_visibility",
+        "reasoning_trace": [
+          "visibility(ENT_6) = clear, blockers=[]",
+          "require_clear=True -> True"
+        ]
+      },
+      "latency_ms": 2394.68,
+      "error_message": null
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__scene_two_zone_corridor_0202__vis3d__02",
+      "scene_id": "scene_two_zone_corridor_0202",
+      "question_id": "scene_two_zone_corridor_0202__vis3d__02",
+      "family": "camera_visibility_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/scene_two_zone_corridor_0202.png",
+      "prompt_text": "Is Rack 5 visibly present and unobstructed from the camera viewpoint?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "true",
+      "normalized_prediction": true,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": true,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_camera_visibility",
+        "reasoning_trace": [
+          "visibility(ENT_5) = clear, blockers=[]",
+          "require_clear=True -> True"
+        ]
+      },
+      "latency_ms": 3524.17,
+      "error_message": null
+    }
+  ]
+}

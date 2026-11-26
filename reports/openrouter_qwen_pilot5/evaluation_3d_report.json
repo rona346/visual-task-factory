@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "warehouse_spatial_3d_v1",
+  "model_name": "qwen/qwen3.8-27b",
+  "provider_name": "openrouter",
+  "is_live_evaluation": true,
+  "evaluated_at_utc": "2026-11-26T15:24:47.651274+00:00",
+  "sample_count": 5,
+  "completed_requests": 3,
+  "correct_count": 3,
+  "incorrect_count": 0,
+  "parse_error_count": 0,
+  "failed_request_count": 2,
+  "missing_image_count": 0,
+  "overall_accuracy": 0.6,
+  "parsed_accuracy": 1.0,
+  "by_family": {
+    "object_overlap_3d": {
+      "family": "object_overlap_3d",
+      "total": 2,
+      "correct": 0,
+      "incorrect": 0,
+      "parse_error": 0,
+      "failed_request": 2,
+      "missing_image": 0,
+      "accuracy": 0.0
+    },
+    "vertical_clearance_3d": {
+      "family": "vertical_clearance_3d",
+      "total": 1,
+      "correct": 1,
+      "incorrect": 0,
+      "parse_error": 0,
+      "failed_request": 0,
+      "missing_image": 0,
+      "accuracy": 1.0
+    },
+    "vertical_relation_3d": {
+      "family": "vertical_relation_3d",
+      "total": 2,
+      "correct": 2,
+      "incorrect": 0,
+      "parse_error": 0,
+      "failed_request": 0,
+      "missing_image": 0,
+      "accuracy": 1.0
+    }
+  },
+  "predictions": [
+    {
+      "record_id": "warehouse_spatial_3d_v1__wh3d_stacked_01__ov3d__01",
+      "scene_id": "wh3d_stacked_01",
+      "question_id": "wh3d_stacked_01__ov3d__01",
+      "family": "object_overlap_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/wh3d_stacked_01.png",
+      "prompt_text": "Do Base Crate and Top Crate touch or overlap in 3D space?",
+      "status": "failed_request",
+      "is_correct": false,
+      "raw_prediction": null,
+      "normalized_prediction": null,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": true,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_box_overlap",
+        "reasoning_trace": [
+          "3D relation(crate_base, crate_top) = boundary_touching",
+          "mode=any_contact_or_overlap -> True"
+        ]
+      },
+      "latency_ms": null,
+      "error_message": "Provider 'openrouter' returned a reasoning-only response with empty final content (model='qwen/qwen3.8-27b', finish_reason='length', reasoning_tokens=1024)."
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__wh3d_stacked_01__ov3d__02",
+      "scene_id": "wh3d_stacked_01",
+      "question_id": "wh3d_stacked_01__ov3d__02",
+      "family": "object_overlap_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/wh3d_stacked_01.png",
+      "prompt_text": "Do Forklift 1 and Front Rack touch or overlap in 3D space?",
+      "status": "failed_request",
+      "is_correct": false,
+      "raw_prediction": null,
+      "normalized_prediction": null,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": false,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_box_overlap",
+        "reasoning_trace": [
+          "3D relation(forklift_1, rack_occluder) = disjoint",
+          "mode=any_contact_or_overlap -> False"
+        ]
+      },
+      "latency_ms": null,
+      "error_message": "Provider 'openrouter' returned a reasoning-only response with empty final content (model='qwen/qwen3.8-27b', finish_reason='length', reasoning_tokens=1029)."
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__wh3d_stacked_01__vrel3d__01",
+      "scene_id": "wh3d_stacked_01",
+      "question_id": "wh3d_stacked_01__vrel3d__01",
+      "family": "vertical_relation_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/wh3d_stacked_01.png",
+      "prompt_text": "In 3D space, is Base Crate positioned entirely below Top Crate?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "true",
+      "normalized_prediction": true,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": true,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_vertical_relation",
+        "reasoning_trace": [
+          "Vertical relation(crate_base, crate_top) = flush_below",
+          "predicate=below -> True"
+        ]
+      },
+      "latency_ms": 2529.4,
+      "error_message": null
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__wh3d_stacked_01__vrel3d__02",
+      "scene_id": "wh3d_stacked_01",
+      "question_id": "wh3d_stacked_01__vrel3d__02",
+      "family": "vertical_relation_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/wh3d_stacked_01.png",
+      "prompt_text": "In 3D space, is Top Crate positioned entirely above Front Rack?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "false",
+      "normalized_prediction": false,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": false,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_vertical_relation",
+        "reasoning_trace": [
+          "Vertical relation(crate_top, rack_occluder) = overlapping_height",
+          "predicate=above -> False"
+        ]
+      },
+      "latency_ms": 4646.69,
+      "error_message": null
+    },
+    {
+      "record_id": "warehouse_spatial_3d_v1__wh3d_stacked_01__vclr3d__01",
+      "scene_id": "wh3d_stacked_01",
+      "question_id": "wh3d_stacked_01__vclr3d__01",
+      "family": "vertical_clearance_3d",
+      "expected_answer_type": "boolean",
+      "image_rel_path": "images/wh3d_stacked_01.png",
+      "prompt_text": "Is there at least 0.5 m of vertical clearance between Base Crate and Top Crate?",
+      "status": "correct",
+      "is_correct": true,
+      "raw_prediction": "false",
+      "normalized_prediction": false,
+      "reference_answer": {
+        "answer_type": "boolean",
+        "value": false,
+        "unit": null,
+        "numeric_tolerance": null,
+        "solver_name": "ground_truth_solver_3d.solve_vertical_clearance",
+        "reasoning_trace": [
+          "clearance=0.000000 m vs threshold=0.500000 m -> False"
+        ]
+      },
+      "latency_ms": 2658.9,
+      "error_message": null
+    }
+  ]
+}

@@ -30,6 +30,8 @@ outputs/
 runs/
 data/generated/
 *.png
+!data/3d/images/
+!data/3d/images/*.png
 *.jsonl
 
 # IDE / OS files
